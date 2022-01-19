@@ -17,6 +17,19 @@ You probably want to use a tagged release to ensure controlled upgrades.
 You can just clone or grab the *conan.cmake* file and put in in your project.
 Or it can be used in this way. Note the ``v0.16.1`` tag in the URL, change it to point to your desired release:
 
+This sample utilizes new features only contained in the development branch. Specifically it includes multi-config functionality.  If you do not wish to use the development branch then do not apply the new workflow.  (reference: [[https://github.com/conan-io/cmake-conan/issues/357]]
+- OLD Workflow 
+  1. Download "cmake-conan" module to ${CMAKE_BINARY_DIR}/conan.cmake
+  2. Add ${CMAKE_BINARY_DIR}/conan.cmake to cmake's module path 
+  3. Define conan variables/pkgs with conan_cmake_configure(.....)
+  4. Load Targets or Load Globals
+ 
+- NEW Workflow 
+  1. Download "cmake-conan" module to ${CMAKE_BINARY_DIR}/conan.cmake
+  2. Add ${CMAKE_BINARY_DIR}/conan.cmake to cmake's module path 
+  3. conan_cmake_configure()
+  5. conan_cmake_autodetect()
+  6. conan_cmake_install()
 ```cmake
 
 cmake_minimum_required(VERSION 3.5)
@@ -26,10 +39,11 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
 add_definitions("-std=c++11")
-
+#NOTE - example below clones cmake module from development branch. No other branches support multi-config development
+set(multiconfig
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/v0.16.1/conan.cmake"
+  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/develop/conan.cmake"
                 "${CMAKE_BINARY_DIR}/conan.cmake"
                 EXPECTED_HASH SHA256=396e16d0f5eabdc6a14afddbcfff62a54a7ee75c6da23f32f7a31bc85db23484
                 TLS_VERIFY ON)
@@ -52,11 +66,12 @@ find_package(fmt)
 add_executable(main main.cpp)
 target_link_libraries(main fmt::fmt)
 ```
-
+## New Workflow ( version >= v0.16 )
 There are different functions you can use from your CMake project to use Conan from there. The
 recommended flow to use cmake-conan is successively calling to `conan_cmake_configure`,
 `conan_cmake_autodetect` and `conan_cmake_install`. This flow is recommended from v0.16 where these
-functions were introduced.
+functions were introduced. To Build in multi-arch environment (most windows users) then the development 
+branch of cmake-conan must be cloned. See "New Workflow" in introduction above. 
 
 The example above is using the Conan `cmake_find_package` generator which is less intrusive than the
 `cmake` generator and more aligned with the direction Conan is taking for the 2.0 version. If you
